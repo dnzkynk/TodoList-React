@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { ITodo } from "./TodoWrapper";
 
 interface EditTodoFormProps {
   editTodo: (todo: string, taskId: string) => void;
-  task: ITodo;
+  task: any;
 }
 
 export const EditTodoForm: React.FC<EditTodoFormProps> = ({
@@ -14,7 +13,9 @@ export const EditTodoForm: React.FC<EditTodoFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    editTodo(value, task.id);
+    console.log("task.id", task._id);
+
+    editTodo(value, task._id);
   };
 
   return (

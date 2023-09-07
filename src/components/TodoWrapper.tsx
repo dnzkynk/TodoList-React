@@ -1,53 +1,71 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { TodoForm } from "./TodoForm";
-import { v4 as uuidv4 } from "uuid";
 import { Todo } from "./Todo";
 import { EditTodoForm } from "./EditTodoForm";
-uuidv4();
-
-export interface ITodo {
-  id: string;
-  task: string;
-  completed: boolean;
-  isEditing: boolean;
-}
 
 export const TodoWrapper = () => {
-  const [todos, setTodos] = useState<ITodo[]>([]);
+  const [todos, setTodos] = useState<any[]>([]);
 
-  const addTodo = (todo: string) => {
-    setTodos([
-      ...todos,
-      { id: uuidv4(), task: todo, completed: false, isEditing: false },
-    ]);
-  };
-  const toggleComplete = (id: string) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+  const getTodos = async () => {
+    const response = await axios.get("http://localhost:3000/todos");
+    console.log(response.data.data);
+    setTodos(response.data.data);
   };
 
-  const deleteTodo = (id: string) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
+  const addTodo = async (todo: string) => {
+    const todoData = {
+      task: todo,
+      completed: false,
+      isEditing: false,
+    };
+
+    const response = await axios.post("http://localhost:3000/todos", todoData);
+    console.log(response.data);
+
+    setTodos([...todos, response.data.data]);
+  };
+
+  const toggleComplete = async (id: string) => {
+    const todoToUpdate = todos.find((todo) => todo._id === id);
+    console.log("todoToUpdate", todoToUpdate);
+    if (todoToUpdate) {
+      const updatedTodo = {
+        ...todoToUpdate,
+        completed: !todoToUpdate.completed,
+      };
+      await axios.post(`http://localhost:3000/todos/${id}`, {
+        completed: updatedTodo.completed,
+      });
+      setTodos(todos.map((todo) => (todo._id === id ? updatedTodo : todo)));
+    }
+  };
+
+  const deleteTodo = async (id: string) => {
+    await axios.delete(`http://localhost:3000/todos/${id}`);
+    setTodos(todos.filter((todo) => todo._id !== id));
   };
 
   const editTodo = (id: string) => {
     setTodos(
       todos.map((todo) =>
-        todo.id === id ? { ...todo, isEditing: !todo.isEditing } : todo
+        todo._id === id ? { ...todo, isEditing: !todo.isEditing } : todo
       )
     );
   };
 
-  const editTask = (task: string, id: string) => {
+  const editTask = async (task: string, id: string) => {
+    await axios.post(`http://localhost:3000/todos/${id}`, { task });
     setTodos(
       todos.map((todo) =>
-        todo.id === id ? { ...todo, task: task, isEditing: false } : todo
+        todo._id === id ? { ...todo, task: task, isEditing: false } : todo
       )
     );
   };
+
+  useEffect(() => {
+    getTodos();
+  }, []);
 
   return (
     <div className="container mx-auto mt-5 flex justify-center items-center h-screen bg-blue-100">
@@ -58,7 +76,8 @@ export const TodoWrapper = () => {
         <TodoForm addTodo={addTodo} />
         {todos.map((todo, idx) =>
           todo.isEditing ? (
-            <EditTodoForm key={idx} editTodo={editTask} task={todo} />
+            (console.log("todo", todo),
+            (<EditTodoForm key={idx} editTodo={editTask} task={todo} />))
           ) : (
             <Todo
               key={idx}

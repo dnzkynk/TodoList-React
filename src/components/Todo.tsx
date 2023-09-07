@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { useEffect } from "react";
 
 export const Todo = ({
   task,
@@ -12,10 +13,15 @@ export const Todo = ({
   deleteTodo: any;
   editTodo: any;
 }) => {
+  useEffect(
+    () => console.log("task.completed", task.completed),
+    [task.completed]
+  );
+
   return (
     <div
       className={`bg-white p-4 shadow rounded mb-4 flex justify-between items-center ${
-        task.completed ? "bg-green-100" : ""
+        task.completed ? "bg-green-200" : ""
       }`}
     >
       <div className="flex items-center">
@@ -23,7 +29,7 @@ export const Todo = ({
           <input
             type="checkbox"
             checked={task.completed}
-            onChange={() => toggleComplete(task.id)}
+            onChange={() => toggleComplete(task._id)}
           />
         </div>
         <span
@@ -36,12 +42,12 @@ export const Todo = ({
       </div>
       <div>
         <FontAwesomeIcon
-          onClick={() => editTodo(task.id)}
+          onClick={() => editTodo(task._id)}
           icon={faPenToSquare}
           className="text-blue-500 mr-2 cursor-pointer hover:scale-105"
         />
         <FontAwesomeIcon
-          onClick={() => deleteTodo(task.id)}
+          onClick={() => deleteTodo(task._id)}
           icon={faTrash}
           className="text-red-500 cursor-pointer hover:scale-105"
         />
